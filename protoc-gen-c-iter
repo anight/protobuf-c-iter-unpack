@@ -652,6 +652,7 @@ class _submessage(_base):
 		ret+= """
 				if (t < 0) return t;
 				${repeated_increment_count}
+				${has_required_field}
 		"""
 
 		return self.render(ret)
