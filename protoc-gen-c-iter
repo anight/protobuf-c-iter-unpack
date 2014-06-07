@@ -670,6 +670,7 @@ class _submessage(_base):
 				if (t < 0) return t;
 				else memory += t;
 				${repeated_increment_count}
+				${has_required_field}
 		"""
 
 		return self.render(ret)
