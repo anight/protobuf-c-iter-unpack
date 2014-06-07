@@ -604,7 +604,7 @@ class _string(_base):
 			if ((buffer=read_uint32(&length, buffer, buffer_end)) == NULL) ERROR_UNPACK;
 			if (buffer + length > buffer_end) ERROR_UNPACK;
 			if ((${read_to_field} = (char*)memory_allocate_copy(length+1,
-					&memory, memory_end, buffer, length))==NULL) ERROR_MEMORY;
+					&memory, memory_end, buffer, length)) == NULL) ERROR_MEMORY;
 			*(memory-1) = 0;
 			buffer += length;
 			${repeated_increment_count}
@@ -690,11 +690,12 @@ class _bytes(_base):
 	def read(self):
 		return self.render("""
 			${repeated_check_resize}
-			if ((buffer=read_uint32(&(${read_to_field}.len), buffer, buffer_end)) == NULL) ERROR_UNPACK;
-			if (buffer + ${read_to_field}.len > buffer_end) ERROR_UNPACK;
-			if ((${read_to_field}.data = (uint8_t*)memory_allocate_copy(${read_to_field}.len,
-					&memory, memory_end, buffer, ${read_to_field}.len))==NULL) ERROR_MEMORY;
-			buffer += ${read_to_field}.len;
+			if ((buffer=read_uint32(&length, buffer, buffer_end)) == NULL) ERROR_UNPACK;
+			if (buffer + length > buffer_end) ERROR_UNPACK;
+			if ((${read_to_field}.data = (uint8_t*)memory_allocate_copy(length,
+					&memory, memory_end, buffer, length)) == NULL) ERROR_MEMORY;
+			${read_to_field}.len = length;
+			buffer += length;
 			${repeated_increment_count}
 			${has_value_set_true}
 			${has_required_field}
@@ -769,7 +770,7 @@ class Message(object):
 			out.append("const uint8_t* tmp_buffer_pointer = NULL;")
 		if self.has_packed_fields() or self.has_field_type(('submessage',)):
 			out.append("int32_t t = 0;")
-		if self.has_field_type(('string','submessage')):
+		if self.has_field_type(('string', 'submessage', 'bytes')):
 			out.append("uint32_t length = 0;")
 		if len(self.fields) == 0:
 			out.append("(void) object;")
